@@ -6,8 +6,8 @@ function App() {
   const [includeSymbols, setIncludeSymbols] = useState(false);
   const [includeNumbers, setIncludeNumbers] = useState(false);
   const [copied, setCopied] = useState(false); // State to track copy status
+  const inputRef = useRef(null); // Ref for the input field
 
-  const passwordRef = useRef(null);
 
   const passwordGenerator = useCallback(() => {
     let pass = "";
@@ -28,26 +28,34 @@ function App() {
   }, [passwordGenerator]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(password).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
-    });
+    if (inputRef.current) {
+      inputRef.current.select(); // Selects the text inside input
+      inputRef.current.setSelectionRange(0, password.length); // Ensures selection
+      navigator.clipboard.writeText(password).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+      });
+    }
   };
 
   return (
     <>
-      <div className="w-full max-w-xl mx-auto shadow-md rounded-lg px-4 my-8 text-orange-500 bg-gray-800">
+      <div className="w-full max-w-xl mx-auto shadow-md rounded-lg px-4 my-8 text-orange-500 bg-gray-800 pb-4">
         <h1 className="text-white text-center my-3"> Password Generator </h1>
         <div className="flex shadow rounded-lg overflow-hidden mb-4">
           <input
+            ref={inputRef}
             type="text"
             value={password}
-            className="outline-none w-full py-1 px-3 bg-white text-gray-800"
+            className={`outline-none w-full py-1 px-3 bg-white text-gray-800 transition-all ${
+            copied ? "bg-green-200" : ""
+          }`}
             placeholder="Password"
             readOnly
           />
-          <button className="bg-amber-200 text-black px-4 cursor-pointer  hover:scale-120 transition-transform duration-300 ease-in-out"
-          onClick={copyToClipboard}
+          <button
+            className="bg-amber-200 text-black px-4 cursor-pointer  hover:scale-125 transition-transform duration-300 ease-in-out"
+            onClick={copyToClipboard}
           >
             {copied ? "Copied!" : "Copy"}
           </button>
